@@ -1,4 +1,6 @@
 /*
+  Author Yves BAZIN
+ change the Speed to adapt to 3.2 Mhz and 32 bits
 	Author: bitluni 2019
 	License: 
 	Creative Commons Attribution ShareAlike 2.0
@@ -152,88 +154,7 @@ void I2S::resetFIFO()
 	i2s.conf.tx_fifo_reset = 0;
 }
 
-bool I2S::initParallelInputMode(const int *pinMap, long sampleRate, int baseClock, int wordSelect)
-{
-    Serial.println("eeee");
-	volatile i2s_dev_t &i2s = *i2sDevices[i2sIndex];
-	//route peripherals
-	const int deviceBaseIndex[] = {I2S0I_DATA_IN0_IDX, I2S1I_DATA_IN0_IDX};
-	const int deviceClockIndex[] = {I2S0I_BCK_IN_IDX, I2S1I_BCK_IN_IDX};
-	const int deviceWordSelectIndex[] = {I2S0I_WS_IN_IDX, I2S1I_WS_IN_IDX};
-	const periph_module_t deviceModule[] = {PERIPH_I2S0_MODULE, PERIPH_I2S1_MODULE};
-	//works only since indices of the pads are sequential
-	for (int i = 0; i < 24; i++)
-		if (pinMap[i] > -1)
-		{
-			PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[pinMap[i]], PIN_FUNC_GPIO);
-			gpio_set_direction((gpio_num_t)pinMap[i], (gpio_mode_t)GPIO_MODE_DEF_INPUT);
-      
-			gpio_matrix_in(pinMap[i], deviceBaseIndex[i2sIndex] + i, false);
-		}
-	if (baseClock > -1)
-		gpio_matrix_in(baseClock, deviceClockIndex[i2sIndex], false);
-	if (wordSelect > -1)
-		gpio_matrix_in(wordSelect, deviceWordSelectIndex[i2sIndex], false);
 
-	//enable I2S peripheral
-	periph_module_enable(deviceModule[i2sIndex]);
-
-	//reset i2s
-	i2s.conf.rx_reset = 1;
-	i2s.conf.rx_reset = 0;
-	i2s.conf.tx_reset = 1;
-	i2s.conf.tx_reset = 0;
-
-	resetFIFO();
-	resetDMA();
-
-	//parallel mode
-	i2s.conf2.val = 0;
-	i2s.conf2.lcd_en = 1;
-	//from technical datasheet figure 64
-	//i2s.conf2.lcd_tx_sdx2_en = 1;
-	//i2s.conf2.lcd_tx_wrx2_en = 1;
-
-	i2s.sample_rate_conf.val = 0;
-	i2s.sample_rate_conf.rx_bits_mod = 32;
-
-	//maximum rate
-	i2s.clkm_conf.val = 0;
-	i2s.clkm_conf.clka_en = 0;
-	i2s.clkm_conf.clkm_div_num = 6; //3//80000000L / sampleRate;
-	i2s.clkm_conf.clkm_div_a = 6;   // 0;
-	i2s.clkm_conf.clkm_div_b = 1;   // 0;
-	i2s.sample_rate_conf.rx_bck_div_num = 2;
-
-	i2s.fifo_conf.val = 0;
-	i2s.fifo_conf.rx_fifo_mod_force_en = 1;
-	i2s.fifo_conf.rx_fifo_mod = 3; //byte packing 0A0B_0B0C = 0, 0A0B_0C0D = 1, 0A00_0B00 = 3,
-	i2s.fifo_conf.rx_data_num = 32;
-	i2s.fifo_conf.dscr_en = 1; //fifo will use dma
-
-	i2s.conf1.val = 0;
-	i2s.conf1.tx_stop_en = 1;
-	i2s.conf1.tx_pcm_bypass = 1;
-
-	i2s.conf_chan.val = 0;
-	i2s.conf_chan.rx_chan_mod = 0;
-
-	//high or low (stereo word order)
-	i2s.conf.rx_right_first = 1;
-
-	i2s.timing.val = 0;
-
-	//clear serial mode flags
-	i2s.conf.rx_msb_right = 0;
-	i2s.conf.rx_msb_shift = 0;
-	i2s.conf.rx_mono = 0;
-	i2s.conf.rx_short_sync = 0;
-
-	//allocate disabled i2s interrupt
-	const int interruptSource[] = {ETS_I2S0_INTR_SOURCE, ETS_I2S1_INTR_SOURCE};
-	esp_intr_alloc(interruptSource[i2sIndex], ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_IRAM, &interrupt, this, &interruptHandle);
-	return true;
-}
 
 bool I2S::initParallelOutputMode(const int *pinMap, long sampleRate, int baseClock, int wordSelect)
 {
@@ -381,9 +302,9 @@ Serial.println("in d4");
    // rtc_clk_apll_enable(true, 1, 0,0 , 0);
     i2s.clkm_conf.val = 0;
     i2s.clkm_conf.clka_en = 0;
-    i2s.clkm_conf.clkm_div_num = 33;//33;//1; //clockN;
-    i2s.clkm_conf.clkm_div_a = 3;   //clockA;
-    i2s.clkm_conf.clkm_div_b =1;   //clockB;
+    i2s.clkm_conf.clkm_div_num = 25;//33;//1; //clockN;
+    i2s.clkm_conf.clkm_div_a = 1;   //clockA;
+    i2s.clkm_conf.clkm_div_b =0;   //clockB;
     i2s.sample_rate_conf.tx_bck_div_num = 1;
     
 
