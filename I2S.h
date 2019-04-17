@@ -288,7 +288,7 @@ void setBrightness(uint8_t b)
   
     
   protected:
-	//virtual void interrupt();
+	virtual void interrupt();
 	
   private:
 	static void IRAM_ATTR interrupt(void *arg);
