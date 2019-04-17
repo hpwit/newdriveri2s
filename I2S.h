@@ -117,7 +117,7 @@ void setBrightness(uint8_t b)
     }
     
     
-    void IRAM_ATTR  putPixelinBuffer(Lines *pixel,uint32_t *buf)
+    void   putPixelinBuffer(Lines *pixel,uint32_t *buf)
     {
         Lines b2,b;
         
@@ -209,7 +209,7 @@ void setBrightness(uint8_t b)
     
     
     
-     void IRAM_ATTR transpose24x1_noinline(unsigned char *A, uint32_t *B) {
+     void  transpose24x1_noinline(unsigned char *A, uint32_t *B) {
         uint32_t  x, y, x1,y1,t,x2,y2;
         
         y = *(unsigned int*)(A);
