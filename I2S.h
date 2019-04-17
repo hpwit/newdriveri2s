@@ -116,6 +116,65 @@ void setBrightness(uint8_t b)
         }
     }
     
+	 void  transpose24x1_noinline(unsigned char *A, uint32_t *B) {
+        uint32_t  x, y, x1,y1,t,x2,y2;
+        
+        y = *(unsigned int*)(A);
+        x = *(unsigned int*)(A+4);
+        y1 = *(unsigned int*)(A+8);
+        x1 = *(unsigned int*)(A+12);
+        
+        y2 = *(unsigned int*)(A+16);
+        x2 = *(unsigned int*)(A+20);
+        
+        
+        // pre-transform x
+        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+        t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
+        
+        t = (x1 ^ (x1 >> 7)) & 0x00AA00AA;  x1 = x1 ^ t ^ (t << 7);
+        t = (x1 ^ (x1 >>14)) & 0x0000CCCC;  x1 = x1 ^ t ^ (t <<14);
+        
+        t = (x2 ^ (x2 >> 7)) & 0x00AA00AA;  x2 = x2 ^ t ^ (t << 7);
+        t = (x2 ^ (x2 >>14)) & 0x0000CCCC;  x2 = x2 ^ t ^ (t <<14);
+        
+        // pre-transform y
+        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+        t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
+        
+        t = (y1 ^ (y1 >> 7)) & 0x00AA00AA;  y1 = y1 ^ t ^ (t << 7);
+        t = (y1 ^ (y1 >>14)) & 0x0000CCCC;  y1 = y1 ^ t ^ (t <<14);
+        
+        t = (y2 ^ (y2 >> 7)) & 0x00AA00AA;  y2 = y2 ^ t ^ (t << 7);
+        t = (y2 ^ (y2 >>14)) & 0x0000CCCC;  y2 = y2 ^ t ^ (t <<14);
+        
+        // final transform
+        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+        x = t;
+        
+        t = (x1 & 0xF0F0F0F0) | ((y1 >> 4) & 0x0F0F0F0F);
+        y1 = ((x1 << 4) & 0xF0F0F0F0) | (y1 & 0x0F0F0F0F);
+        x1 = t;
+        
+        t = (x2 & 0xF0F0F0F0) | ((y2 >> 4) & 0x0F0F0F0F);
+        y2 = ((x2 << 4) & 0xF0F0F0F0) | (y2 & 0x0F0F0F0F);
+        x2 = t;
+        
+        
+        
+        *((uint32_t*)B) = (uint32_t)((y & 0xff) |  (  (y1 & 0xff) << 8 )  |  (  (y2 & 0xff) << 16 ) )   ;
+        *((uint32_t*)(B+1)) = (uint32_t)(((y & 0xff00) |((y1&0xff00) <<8)  |((y2&0xff00) <<16)  )>>8    );
+        *((uint32_t*)(B+2)) =(uint32_t)(  (  (y & 0xff0000) >>16)|((y1&0xff0000) >>8)   |((y2&0xff0000))     );
+        *((uint32_t*)(B+3)) = (uint32_t)(((y & 0xff000000) >>16 |((y1&0xff000000)>>8 ) |((y2&0xff000000) )  )>>8);
+        
+        *((uint32_t*)B+4) =(uint32_t)( (x & 0xff) |((x1&0xff) <<8)  |((x2&0xff) <<16) );
+        *((uint32_t*)(B+5)) = (uint32_t)(((x & 0xff00) |((x1&0xff00) <<8)    |((x2&0xff00) <<16)    )>>8);
+        *((uint32_t*)(B+6)) = (uint32_t)(  (  (x & 0xff0000) >>16)|((x1&0xff0000) >>8)   |((x2&0xff0000))     );
+        *((uint32_t*)(B+7)) = (uint32_t)(((x & 0xff000000) >>16 |((x1&0xff000000)>>8 )    |((x2&0xff000000) )    )>>8);
+        
+    }
+    
     
     void   putPixelinBuffer(Lines *pixel,uint32_t *buf)
     {
@@ -209,64 +268,6 @@ void setBrightness(uint8_t b)
     
     
     
-     void  transpose24x1_noinline(unsigned char *A, uint32_t *B) {
-        uint32_t  x, y, x1,y1,t,x2,y2;
-        
-        y = *(unsigned int*)(A);
-        x = *(unsigned int*)(A+4);
-        y1 = *(unsigned int*)(A+8);
-        x1 = *(unsigned int*)(A+12);
-        
-        y2 = *(unsigned int*)(A+16);
-        x2 = *(unsigned int*)(A+20);
-        
-        
-        // pre-transform x
-        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
-        t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
-        
-        t = (x1 ^ (x1 >> 7)) & 0x00AA00AA;  x1 = x1 ^ t ^ (t << 7);
-        t = (x1 ^ (x1 >>14)) & 0x0000CCCC;  x1 = x1 ^ t ^ (t <<14);
-        
-        t = (x2 ^ (x2 >> 7)) & 0x00AA00AA;  x2 = x2 ^ t ^ (t << 7);
-        t = (x2 ^ (x2 >>14)) & 0x0000CCCC;  x2 = x2 ^ t ^ (t <<14);
-        
-        // pre-transform y
-        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
-        t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
-        
-        t = (y1 ^ (y1 >> 7)) & 0x00AA00AA;  y1 = y1 ^ t ^ (t << 7);
-        t = (y1 ^ (y1 >>14)) & 0x0000CCCC;  y1 = y1 ^ t ^ (t <<14);
-        
-        t = (y2 ^ (y2 >> 7)) & 0x00AA00AA;  y2 = y2 ^ t ^ (t << 7);
-        t = (y2 ^ (y2 >>14)) & 0x0000CCCC;  y2 = y2 ^ t ^ (t <<14);
-        
-        // final transform
-        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
-        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
-        x = t;
-        
-        t = (x1 & 0xF0F0F0F0) | ((y1 >> 4) & 0x0F0F0F0F);
-        y1 = ((x1 << 4) & 0xF0F0F0F0) | (y1 & 0x0F0F0F0F);
-        x1 = t;
-        
-        t = (x2 & 0xF0F0F0F0) | ((y2 >> 4) & 0x0F0F0F0F);
-        y2 = ((x2 << 4) & 0xF0F0F0F0) | (y2 & 0x0F0F0F0F);
-        x2 = t;
-        
-        
-        
-        *((uint32_t*)B) = (uint32_t)((y & 0xff) |  (  (y1 & 0xff) << 8 )  |  (  (y2 & 0xff) << 16 ) )   ;
-        *((uint32_t*)(B+1)) = (uint32_t)(((y & 0xff00) |((y1&0xff00) <<8)  |((y2&0xff00) <<16)  )>>8    );
-        *((uint32_t*)(B+2)) =(uint32_t)(  (  (y & 0xff0000) >>16)|((y1&0xff0000) >>8)   |((y2&0xff0000))     );
-        *((uint32_t*)(B+3)) = (uint32_t)(((y & 0xff000000) >>16 |((y1&0xff000000)>>8 ) |((y2&0xff000000) )  )>>8);
-        
-        *((uint32_t*)B+4) =(uint32_t)( (x & 0xff) |((x1&0xff) <<8)  |((x2&0xff) <<16) );
-        *((uint32_t*)(B+5)) = (uint32_t)(((x & 0xff00) |((x1&0xff00) <<8)    |((x2&0xff00) <<16)    )>>8);
-        *((uint32_t*)(B+6)) = (uint32_t)(  (  (x & 0xff0000) >>16)|((x1&0xff0000) >>8)   |((x2&0xff0000))     );
-        *((uint32_t*)(B+7)) = (uint32_t)(((x & 0xff000000) >>16 |((x1&0xff000000)>>8 )    |((x2&0xff000000) )    )>>8);
-        
-    }
     
 
 	void reset();
@@ -287,7 +288,7 @@ void setBrightness(uint8_t b)
   
     
   protected:
-	virtual void interrupt();
+	//virtual void interrupt();
 	
   private:
 	static void IRAM_ATTR interrupt(void *arg);
