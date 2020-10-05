@@ -31,9 +31,11 @@ void IRAM_ATTR I2S::interrupt(void *arg)
 {
 	//volatile i2s_dev_t &i2s = *i2sDevices[((I2S *)arg)->i2sIndex];
 	//i2s.int_clr.val = i2s.int_raw.val;
-	REG_WRITE(I2S_INT_CLR_REG(0), (REG_READ(I2S_INT_RAW_REG( 0 )) & 0xffffffc0) | 0x3f);
+	
 	if(GET_PERI_REG_BITS(I2S_INT_ST_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ST_V,  I2S_OUT_EOF_INT_ST_S))
 		((I2S *)arg)->callback();
+	REG_WRITE(I2S_INT_CLR_REG(0), (REG_READ(I2S_INT_RAW_REG( 0 )) & 0xffffffc0) | 0x3f);
+	
     
 	//((I2S *)arg)->interrupt();
 }
