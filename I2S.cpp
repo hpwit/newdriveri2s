@@ -1,15 +1,7 @@
 /*
   Author Yves BAZIN
  change the Speed to adapt to 3.2 Mhz and 32 bits
-	Author: bitluni 2019
-	License: 
-	Creative Commons Attribution ShareAlike 2.0
-	https://creativecommons.org/licenses/by-sa/2.0/
-	
-	For further details check out: 
-		https://youtube.com/bitlunislab
-		https://github.com/bitluni
-		http://bitluni.net
+ based on the work of bitluni for i2s 4 vga
 */
 #include "I2S.h"
 #include "Log.h"
