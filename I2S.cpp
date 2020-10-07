@@ -298,9 +298,18 @@ Serial.println("in d4");
    // rtc_clk_apll_enable(true, 1, 0,0 , 0);
     i2s.clkm_conf.val = 0;
     i2s.clkm_conf.clka_en = 0;
-    i2s.clkm_conf.clkm_div_num = 25;//33;//1; //clockN;
-    i2s.clkm_conf.clkm_div_a = 1;   //clockA;
-    i2s.clkm_conf.clkm_div_b =0;   //clockB;
+    //config 3,2 Mhz
+    //i2s.clkm_conf.clkm_div_num = 25;//33;//1; //clockN;
+    //i2s.clkm_conf.clkm_div_a = 1;   //clockA;
+   // i2s.clkm_conf.clkm_div_b =0;   //clockB;
+    
+    //config2,4Mhz
+    i2s.clkm_conf.clkm_div_num = 33;//33;//1; //clockN;
+    i2s.clkm_conf.clkm_div_a = 3;   //clockA;
+    i2s.clkm_conf.clkm_div_b =1;
+    
+    
+    
     i2s.sample_rate_conf.tx_bck_div_num = 1;
     
 

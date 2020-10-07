@@ -26,7 +26,7 @@ class I2S
 	intr_handle_t interruptHandle;
 	
 	int dmaBufferActive;
-	DMABuffer **dmaBuffers;
+	DMABuffer2 **dmaBuffers;
 	volatile bool stopSignal;
  volatile bool runningPixel=false;
 
@@ -90,7 +90,8 @@ void setBrightness(uint8_t b)
         
         for (int i = 0; i < this->dmaBufferCount; i++)
         {
-            this->dmaBuffers[i] = DMABuffer::allocate(96); //we need 24 bit * 4 pulses per bit
+            //this->dmaBuffers[i] = DMABuffer::allocate(96); //we need 24 bit * 4 pulses per bit
+            this->dmaBuffers[i] = DMABuffer::allocate(24*3); //we need 24 bit * 4 pulses per bit
             if (i)
                 this->dmaBuffers[i - 1]->next(this->dmaBuffers[i]);
             empty((uint32_t*)this->dmaBuffers[i]->buffer); //we do get the buffer prefilled with the 0 at the end and the 1
@@ -104,8 +105,10 @@ void setBrightness(uint8_t b)
     {
         for(int i=0;i<24;i++)
         {
-            buf[4*i]=0xffffffff;
-            buf[4*i+3]=0;
+            //buf[4*i]=0xffffffff;
+            //buf[4*i+3]=0;
+            buf[3*i]=0xffffffff;
+            buf[3*i+2]=0;
         }
     }
     
@@ -181,8 +184,10 @@ void setBrightness(uint8_t b)
             transpose24x1_noinline(b.bytes,b2.shorts);
             for(int i=0;i<8;i++)
             {
-                buf[color*32+4*i+1]=(b2.shorts[7-i] << 8); //the <<8 is to free up the first byte
-                buf[color*32+4*i+2]=ledType*(b2.shorts[7-i] << 8);
+                //buf[color*32+4*i+1]=(b2.shorts[7-i] << 8); //the <<8 is to free up the first byte
+               // buf[color*32+4*i+2]=ledType*(b2.shorts[7-i] << 8);
+                
+                buf[color*24+3*i+1]=(b2.shorts[7-i] << 8)
             }
         }
     }

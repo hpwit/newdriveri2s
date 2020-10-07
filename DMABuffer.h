@@ -10,20 +10,20 @@
 		http://bitluni.net
 */
 #pragma once
-#include "Log.h"
+//#include "Log.h"
 
-class DMABuffer
+class DMABufferI2S
 {
   public:
 	lldesc_t descriptor;
 	 uint8_t *buffer; //uint8_t
 
-	static DMABuffer *allocate(int bytes, bool clear = true)
+	static DMABufferI2S *allocate(int bytes, bool clear = true)
 	{
 		DMABuffer *b = (DMABuffer *)heap_caps_malloc(sizeof(DMABuffer), MALLOC_CAP_DMA);
 		if (!b)
         {
-			DEBUG_PRINTLN("Failed to alloc DMABuffer class");
+			//DEBUG_PRINTLN("Failed to alloc DMABuffer class");
             Serial.println("impossible");
         }
         b->init(bytes, clear);
