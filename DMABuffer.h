@@ -10,7 +10,7 @@
 		http://bitluni.net
 */
 #pragma once
-//#include "Log.h"
+#include "Log.h"
 
 class DMABufferI2S
 {
@@ -20,7 +20,7 @@ class DMABufferI2S
 
 	static DMABufferI2S *allocate(int bytes, bool clear = true)
 	{
-		DMABuffer *b = (DMABuffer *)heap_caps_malloc(sizeof(DMABuffer), MALLOC_CAP_DMA);
+        DMABufferI2S *b = (DMABufferI2S *)heap_caps_malloc(sizeof(DMABufferI2S), MALLOC_CAP_DMA);
 		if (!b)
         {
 			//DEBUG_PRINTLN("Failed to alloc DMABuffer class");
@@ -55,7 +55,7 @@ class DMABufferI2S
 		return init((uint8_t *)heap_caps_malloc(bytes*4, MALLOC_CAP_DMA), bytes, clear); //uint8_t
 	}
 
-	void next(DMABuffer *next)
+	void next(DMABufferI2S *next)
 	{
 		descriptor.qe.stqe_next = &(next->descriptor);
 	}

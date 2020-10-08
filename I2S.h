@@ -26,7 +26,7 @@ class I2S
 	intr_handle_t interruptHandle;
 	
 	int dmaBufferActive;
-	DMABuffer2 **dmaBuffers;
+    DMABufferI2S **dmaBuffers;
 	volatile bool stopSignal;
  volatile bool runningPixel=false;
 
@@ -80,7 +80,7 @@ void setBrightness(uint8_t b)
         }
         
         this->dmaBufferCount=dmaBufferCount;
-        this->dmaBuffers = (DMABuffer **)malloc(sizeof(DMABuffer *) * dmaBufferCount);
+        this->dmaBuffers = (DMABufferI2S **)malloc(sizeof(DMABufferI2S *) * dmaBufferCount);
         if(!this->dmaBuffers)
         {
             Serial.println("Not enough memory soory...");
@@ -91,7 +91,7 @@ void setBrightness(uint8_t b)
         for (int i = 0; i < this->dmaBufferCount; i++)
         {
             //this->dmaBuffers[i] = DMABuffer::allocate(96); //we need 24 bit * 4 pulses per bit
-            this->dmaBuffers[i] = DMABuffer::allocate(24*3); //we need 24 bit * 4 pulses per bit
+            this->dmaBuffers[i] = DMABufferI2S::allocate(24*3); //we need 24 bit * 4 pulses per bit
             if (i)
                 this->dmaBuffers[i - 1]->next(this->dmaBuffers[i]);
             empty((uint32_t*)this->dmaBuffers[i]->buffer); //we do get the buffer prefilled with the 0 at the end and the 1
@@ -187,7 +187,7 @@ void setBrightness(uint8_t b)
                 //buf[color*32+4*i+1]=(b2.shorts[7-i] << 8); //the <<8 is to free up the first byte
                // buf[color*32+4*i+2]=ledType*(b2.shorts[7-i] << 8);
                 
-                buf[color*24+3*i+1]=(b2.shorts[7-i] << 8)
+                buf[color*24+3*i+1]=(b2.shorts[7-i] << 8);
             }
         }
     }

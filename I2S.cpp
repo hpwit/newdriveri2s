@@ -24,7 +24,7 @@ void IRAM_ATTR I2S::interrupt(void *arg)
 	//volatile i2s_dev_t &i2s = *i2sDevices[((I2S *)arg)->i2sIndex];
 	//i2s.int_clr.val = i2s.int_raw.val;
 	
-	if(GET_PERI_REG_BITS(I2S_INT_ST_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ST_V,  I2S_OUT_EOF_INT_ST_S))
+	if(GET_PERI_REG_BITS(I2S_INT_ST_REG(0), I2S_OUT_EOF_INT_ST_V,  I2S_OUT_EOF_INT_ST_S))
 		((I2S *)arg)->callback();
 	REG_WRITE(I2S_INT_CLR_REG(0), (REG_READ(I2S_INT_RAW_REG( 0 )) & 0xffffffc0) | 0x3f);
 	
@@ -354,12 +354,12 @@ Serial.println("in d4");
 void I2S::allocateDMABuffers(int count, int bytes)
 {
 	dmaBufferCount = count;
-	dmaBuffers = (DMABuffer **)malloc(sizeof(DMABuffer *) * dmaBufferCount);
+	dmaBuffers = (DMABufferI2S **)malloc(sizeof(DMABufferI2S *) * dmaBufferCount);
 	if (!dmaBuffers)
 		DEBUG_PRINTLN("Failed to allocate DMABuffer array");
 	for (int i = 0; i < dmaBufferCount; i++)
 	{
-		dmaBuffers[i] = DMABuffer::allocate(bytes);
+		dmaBuffers[i] = DMABufferI2S::allocate(bytes);
 		if (i)
 			dmaBuffers[i - 1]->next(dmaBuffers[i]);
 	}
