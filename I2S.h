@@ -233,15 +233,18 @@ void setBrightness(uint8_t b)
     void IRAM_ATTR  callback()
     {
         Lines pixel[3];
+       // i2s_dev_t *i2sDevices[] = {&I2S0, &I2S1};
+       //i2s_dev_t &i2s = *i2sDevices[i2sIndex];
         
         if(stopSignal)
         {
-            //delay(0);
-            i2sStop();
+            //delay(0);*
+            I2S0.conf.tx_start = 0;
+            //i2sStop();
             runningPixel=false;
             return;
         }
-        if(ledToDisplay<=nun_led_per_strip)
+        if(ledToDisplay<nun_led_per_strip)
         {
             
             for(int i = 0; i <num_strips; i++) {
@@ -253,13 +256,29 @@ void setBrightness(uint8_t b)
             
             putPixelinBuffer(pixel,(uint32_t*)dmaBuffers[dmaBufferActive]->buffer);
             dmaBufferActive = (dmaBufferActive + 1)% dmaBufferCount;
+            
         }
         else
         {
-            //if no more pixels then we will read the other buffer and stop
-           // if(ledToDisplay==nun_led_per_strip)
-             //   ledToDisplay++;
-            //if(ledToDisplay==nun_led_per_strip+1)
+            if(ledToDisplay<=nun_led_per_strip+1)
+           {
+                //cont->ledbuff[cont->ledToDisplay]=cont->dmaBufferActive;
+             CRGB *poli=leds+ledToDisplay;
+            for(int i = 0; i <num_strips; i++) {
+                //Serial.println((uint32_t)int_leds);
+                pixel[0].bytes[i] = 0x00;
+                pixel[1].bytes[i] = 0x00;
+                pixel[2].bytes[i] = 0x00;
+                poli+=nun_led_per_strip;
+            }
+                putPixelinBuffer(pixel,(uint32_t*)dmaBuffers[dmaBufferActive]->buffer);     
+            
+            
+          
+                ledToDisplay++;
+               dmaBufferActive = (dmaBufferActive + 1)% dmaBufferCount;
+           }
+            else
                 stopSignal=true;
         }
     }
